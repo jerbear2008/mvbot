@@ -21,13 +21,11 @@ bot.on('ready', () => {
     // console.log('mvbot ready!\n');
 });
 
-bot.on('message', message => {
+bot.on('message', async (message) => {
 
     if (message.content.startsWith('!mv')) {
 
         args = message.content.split(' ');
-
-        // syntax: !mv <message> <channel> "<reason>"
 
         if (!args[2]) {
             message.channel.send('Invalid number of arguments');
