@@ -48,11 +48,11 @@ bot.on('message', message => {
         message.channel.messages.fetch(target_message).then(msg => {
 
             if (!message.member.hasPermission("MANAGE_MESSAGES")) {
-                
+
                 message.channel.send('Sorry, ' + message.member.displayName + '. I can\'t let you do that.');
                 return;
             }
-                        
+
             target_channel = bot.channels.resolve(
                 args[2].replace(/<#/, '')
                         .replace(/>/, '')
@@ -64,14 +64,10 @@ bot.on('message', message => {
                 return;
             }
 
-            var mvstr = '<@' + msg.member + '> | <#' + message.channel + '>\n';
-            mvstr += message.createdAt + '\n';
-            mvstr += (args[3] == null) ? '' : '*\"' + message.content.split('\"', 2)[1] + '\"*';
-            mvstr += ' - <@' + message.member + '>\n\n';
             var embeds = [];
             var attachments = [];
 
-            
+
             if (msg.embeds.length > 0) {
 
                 msg.embeds.forEach( element => {
@@ -81,7 +77,7 @@ bot.on('message', message => {
 
                 }, err => {
                     console.log(err);
-                });    
+                });
 
             } else {
 
@@ -91,13 +87,10 @@ bot.on('message', message => {
                         console.log(a);
                         attachments.push(a.proxyURL);
                     });
-                }  
+                }
             }
 
-            target_channel.send(msg.content == '' ? mvstr :  mvstr + '>>> ' + msg.content, {
-                files: attachments,
-                embeds: embeds
-            });
+            sendWebhook(target_channel, msg, attachments)
 
            msg.delete(); // delete message to be moved.
            message.delete(); // delete invoking message
@@ -108,6 +101,25 @@ bot.on('message', message => {
     }
 
 });
+
+async function sendWebhook(channel, msg, files){
+  await let webhooks = channel.fetchWebhooks()// get webhooks
+  let webhook = false
+  webhooks.each((hook) => { // find mvbot webhook
+    if(hook.name = "mvbot"){
+      webhook = hook
+    }
+  })
+  if(!webhook){ //create one if not found
+    await webhook = channel.createWebhook("mvbot")
+  }
+  await return webhook.send(msg.content, { // send
+    username: msg.author.username,
+    avatar_url: msg.author.avatarURL('png', true),
+    files: files
+  })
+}
+
 
 bot.on('error', err => {
     console.log(err);
